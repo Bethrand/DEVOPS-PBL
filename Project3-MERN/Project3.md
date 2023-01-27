@@ -254,7 +254,7 @@ error due to `vim api.js`documentation not pasting correctly, used `nano api.js`
 
 `npm install nodemon --save-dev`
 
-`vim package.json`
+`vi package.json`
 
 ![Package json](./Images/Package.json%20updated.png)
 
@@ -264,9 +264,13 @@ error due to `vim api.js`documentation not pasting correctly, used `nano api.js`
 
 `"proxy": "http://localhost:5000",`
 
+`cd ..`
+
 `npm run dev`
 
-[React App](http://35.174.113.10:3000)
+[React App](http://3.83.151.132:3000)
+
+![React App](./Images/React3000.PNG)
 
 `cd client`
 
@@ -278,7 +282,7 @@ error due to `vim api.js`documentation not pasting correctly, used `nano api.js`
 
 `touch Input.js ListTodo.js Todo.js`
 
-`vim Input.js`
+`vi Input.js`
 
 `import React, { Component } from 'react';
 import axios from 'axios';
@@ -326,7 +330,7 @@ return (
 
 export default Input`
 
-`cd client`
+To cd into client `cd ../..`
 
 `npm install axios`
 
@@ -552,5 +556,6 @@ monospace;
 
 `npm run dev`
 
+[To-Do App](http://3.83.151.132:3000/)
 
-
+![To-Do App](./Images/To-Do%20App.PNG)
