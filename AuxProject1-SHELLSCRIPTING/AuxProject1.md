@@ -1,7 +1,7 @@
 # **Aux Project 1: SHELL SCRIPTING**
 
 ## TASK: *Onboard 20 New Linux Users onto a Server*
-### STEPS: 
+### STEPS; 
 
 `mkdir shell`
 
