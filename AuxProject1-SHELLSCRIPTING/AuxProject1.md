@@ -150,7 +150,7 @@ sudo passwd -x 5 $user
 
 `./onboard.sh`
 
-# ** Change to root user to run Users**
+# ** Change to root user to run New Users**
 
 `sudo su`
 
