@@ -542,9 +542,9 @@
 `sudo vi wp-config.php` - *Due to to edit DB-NAME (wordpress) DB-USERNAME (wordpress), DB-Password (password1) & DB-Host (172.31.48.203)*
 To avoid this route; do `cp wordpress/wp-config-sample.php wordpress/wp-config.php` then `cp -R wordpress /var/www/html/`
 
-#### 4 - *We try to access from our browser the link to our wordpress 'http://<web-server-public-IP-Address>/wordpress/'*
+#### 4 - *We try to access from our browser the link to our wordpress 'http://web-server-public-IP-Address/wordpress/'*
 
-`http://100.25.163.152/wordpress/` - 
+`http://100.25.163.152/wordpress/` 
 
 ![RemoteDB ConnectionSuccess](./Images/RemoteDB%20ConnectionSuccess.PNG)
 
