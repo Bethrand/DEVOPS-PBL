@@ -194,7 +194,7 @@
 
 ![Ec2Instance DBServer](./Images/EC2%20Instances%20DBServer.PNG)
 
-![Volume DBServer](./Images/3Volume%20WebServer.PNG)
+![Volume DBServer](./Images/3Volume%20DBServer.PNG)
 
 #### 2 *Connecting Database-server to instance*
 
