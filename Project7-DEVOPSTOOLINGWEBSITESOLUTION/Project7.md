@@ -1,6 +1,7 @@
-# **Project 6: WEB SOLUTION WITH WORDPRESS - Prepare storage infrastructure on two Linux servers and implement a basic web solution using WordPress**
+# **Project 7: DEVOPS (Single) TOOLING WEB SOLUTION  - We will implement a web solution for a DevOps team using LAMP stack with remote Database and NFS servers which will consist of following components:
+*Infrastructure: AWS, Webserver Linux: Red Hat Enterprise Linux 8, Database Server: Ubuntu 20.04 + MySQL, Storage Server: Red Hat Enterprise Linux 8 + NFS Server, Programming Language: PHP, Code Repository: GitHub*
 
-## STEP 1 — *Prepare a Web Server*
+## STEP 1 — *Prepare a NFS Server*
 
 #### 1 *Launching an EC2 instance that will serve as "Web Server". Create 3 volumes in the same AZ as your Web Server EC2, each of 10 GiB*
 
@@ -381,7 +382,7 @@
 
 `sudo systemctl start httpd`
 
-#### 4 - *To install PHP and it’s dependencies*
+#### 4 - *To install PHP and it’s depemdencies*
 
 `sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm`
 
@@ -553,3 +554,156 @@ To avoid this route; do `cp wordpress/wp-config-sample.php wordpress/wp-config.p
 ![RemoteDB ConnectedSuccessfully](./Images/RemoteDB%20ConnectedSuccessfully.PNG)
 
 ![RemoteDBWordpress Completed](./Images/RemoteDBWordpress%20Completed.PNG)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..
+;h;gkv,kkxvmvkkl
