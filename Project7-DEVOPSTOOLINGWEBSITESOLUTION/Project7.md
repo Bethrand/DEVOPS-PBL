@@ -3,31 +3,31 @@
 
 ## STEP 1 — *Prepare a NFS Server*
 
-#### 1 *Launching an EC2 instance that will serve as "Web Server". Create 3 volumes in the same AZ as your Web Server EC2, each of 10 GiB*
+#### 1 *Launching a RHEL OS EC2 instance that will serve as "NFS Server". Create additional 2 volumes in the same AZ as your NFS-Server EC2, each of 8Gib but we will adopt 5 Gib to distribute to lv-opt, lv-apps, lv-logs. To utilize the AWS free tier volume we will create only 2 volumes which will be sub distributed to form our LOGICAL VOLUME. We will save time by adding our security groups for the NFS Server (TCP 111, TCP 2049, UDP 111, UDP 2049) at this point*
 
-![Ec2Instance Webserver](./Images/EC2%20Instances%20WebServer.PNG)
+![Ec2Instance NFSserver](./Images/NFS%20Server%20EC2.png)
 
-![3Volume WebServer](./Images/3Volume%20WebServer.PNG)
+![3Volume NFSServer](./Images/NFS%203Volume.png)
 
-#### 2 *Connecting web-server to instance*
+#### 2 *Connecting NFS-server to instance*
 
-`ssh -i "project-6.pem" ec2-user@ec2-100-25-163-152.compute-1.amazonaws.com`
+`ssh -i "Project7.pem" ubuntu@3.92.185.188` - publicIP
 
-#### 3  - *Using lsblk command to inspect what block devices are attached to server.Notice names of your newly created devices. All devices in Linux reside in /dev/ directory. Inspect it with ls /dev/ and make sure you see all 3 newly created block devices there – their names will likely be xvdf, xvdh, xvdg*
+#### 3  - *NOW TO CONFIGURE LVM (logical Volume) on the NFS Server; Use lsblk command to inspect what block devices are attached to server. Notice names of your newly created devices. All devices in Linux reside in /dev/ directory. Inspect it with ls /dev/ and make sure you see all 2 newly created block devices there – their names will likely be xvdb, xvdc. This xvda is default*
 
 `lsblk`
 
-![blockdevice attached](./Images/blockdevice%20attached.PNG)
+![blockdevice attached](./Images/NFS%20blockdevice%20attached.png)
 
 #### 4 - *Using df -h command to see all mounts and free space on your server*
 
 `df -h` 
 
-![MountSpace Avail](./Images/MountSpace%20Avail.PNG)
+![MountSpace Avail](./Images/Avail%20Mountspace.png)
 
-#### 5 - *Using gdisk utility to create a single partition on each of the 3 (xvdf xvdg xvdh) disks*
+#### 5 - *Using gdisk utility to create a single partition on each of the 2 additional volume attached (xvdb xvdc) disks, remember there is an already xvda volume default, we will not utilize this*
 
-`sudo gdisk /dev/xvdf` 
+`sudo gdisk /dev/xvdb` 
 
 `?` - *shows help listing of all command*
 
@@ -47,9 +47,7 @@
 
 `y` - *to complete partition*
 
-![Create Partition](./Images/Create%20Partition.PNG)
-
-`sudo gdisk /dev/xvdg` - *Use gdisk utility to create a single partition on each of the 3 (xvdf xvdg xvdh) disks*
+`sudo gdisk /dev/xvdc` 
 
 `n` - *enter n to add a new partition*
 
@@ -67,29 +65,13 @@
 
 `y` - *to complete partition*
 
-`sudo gdisk /dev/xvdh` - *Use gdisk utility to create a single partition on each of the 3 (xvdf xvdg xvdh) disks*
+![Create Partition](./Images/Partition%20created.png)
 
-`n` - *enter n to add a new partition*
-
-`1` - *to select default*
-
-`enter` - *first sector*
-
-`enter` - *displays Last sector*
-
-`8300`
-
-`p` - *to preview*
-
-`w` - *to write*
-
-`y` - *to complete partition*
-
-#### 6 - *Using lsblk utility to view the newly configured partition on each of the 3 disks*
+#### 6 - *Using lsblk utility to view the newly configured partition on each of the 2 disks*
 
 `lsblk` 
 
-![3diskPartition Created](./Images/3diskPartition%20Created.PNG)
+![2diskPartition Created](./Images/NFS%203diskPartition%20Created.png)
 
 #### 7 - *Installing lvm2 package using sudo yum install lvm2. Run sudo lvmdiskscan command to check for available partitions. Note: RedHat uses yum to install whereas ubuntu uses apt*
 
@@ -97,613 +79,386 @@
 
 `sudo lvmdiskscan` 
 
-#### 8 - *Using pvcreate utility to mark each of 3 disks as physical volumes (PVs) to be used by LVM*
+#### 8 - *Using pvcreate utility to mark each of 2 disks as physical volumes (PVs) to be used by LVM*
 
-`sudo pvcreate /dev/xvdf1 /dev/xvdg1 /dev/xvdh1` 
+`sudo pvcreate /dev/xvdb1 /dev/xvdc1` 
 
 #### 9 - *Verifying that your Physical volume has been created successfully by running sudo pvs*
 
 `sudo pvs` 
 
-![physicalvolume](./Images/physicalvolume.PNG)
+![physicalvolume](./Images/NFS%20PVs.png)
 
-#### 10 - *Using vgcreate utility to add all 3 PVs to a volume group (VG). Name the VG webdata-vg*
+#### 10 - *Using vgcreate utility to add all 2 PVs to a volume group (VG). Name the VG nfs-vg*
 
-`sudo vgcreate webdata-vg /dev/xvdh1 /dev/xvdg1 /dev/xvdf1` 
+`sudo vgcreate nfs-vg /dev/xvdb1 /dev/xvdc1` 
 
 #### 11 - *Verifying that your VG has been created successfully by running sudo vgs*
 
-`sudo vgs`
+`sudo vgs` or `sudo vgdisplay`
 
-![VolumeGroup](./Images/VolumeGroup.PNG)
+![VolumeGroup](./Images/NFS%20VolumeGroup.png)
 
-#### 12 - *Using lvcreate utility to create 2 logical volumes. apps-lv (Use half of the PV size - 29.99g/2 = 14G), and logs-lv Use the remaining space of the PV size. NOTE: apps-lv is used to store data for the Website while, logs-lv is used to store data for logs.*
+#### 12 - *Using lvcreate utility to create 3 logical volumes for lv-apps, lv-logs and lv-opt (Use 1 3rd of the PV size - 15.99g/3 = 5Gib) and attach them to our nfs-vg . NOTE: lv-apps is used to store data for the Webservers while, lv-logs is used to store data for webserver logs and lv-opt for Jenkins Server in project 8*
 
-`sudo lvcreate -n apps-lv -L 14G webdata-vg` 
+`sudo lvcreate -n lv-apps -L 5G nfs-vg` 
 
-`sudo lvcreate -n logs-lv -L 14G webdata-vg` 
+`sudo lvcreate -n lv-logs -L 5G nfs-vg` 
+
+`sudo lvcreate -n lv-opt -L 5G nfs-vg` 
 
 #### 13 - *Verifying  that your Logical Volume has been created successfully by running sudo lvs*
 
 `sudo lvs` 
 
-![LogicalVolume](./Images/LogicalVolume.PNG)
+![LogicalVolume](./Images/NFS%20Logical%20Volumes.png)
 
-#### 14 - *Verifying  the entire setup*
+#### 14 - *Creating mount points on /mnt directory for the 3 nfs logical volumes; Format LV with xfs, then Mount LV on /mnt/apps/ directory* 
 
-`sudo vgdisplay -v #view complete setup - VG, PV, and LV` 
+`sudo mkdir /mnt/apps /mnt/logs /mnt/opt` 
+
+`sudo vgdisplay -v #view complete setup - VG, PV, and LV` - *Verifying  the entire setup*
 
 `sudo lsblk ` 
 
-![EntireSetup](./Images/EntireSetup.PNG)
+*Use mkfs.xfs to format the logical volumes with xfs filesystem*
 
-#### 15 - *Using mkfs.ext4 to format the logical volumes with ext4 filesystem*
+`sudo mkfs.xfs /dev/nfs-vg/lv-apps` 
 
-`sudo mkfs -t ext4 /dev/webdata-vg/apps-lv` 
+`sudo mkfs.xfs /dev/nfs-vg/lv-logs` 
 
-`sudo mkfs -t ext4 /dev/webdata-vg/logs-lv` 
+`sudo mkfs.xfs /dev/nfs-vg/lv-opt` 
 
-#### 16 - *Creating /var/www/html directory to store website files*
+*Mounting the logical volume on the /mnt/apps/ directory*
 
-`sudo mkdir -p /var/www/html` 
+`sudo mount /dev/nfs-vg/lv-apps /mnt/apps/`
 
-#### 17 - *Creating /home/recovery/logs to store backup of log data*
+`sudo mount /dev/nfs-vg/lv-logs /mnt/logs/`
 
-`sudo mkdir -p /home/recovery/logs` 
+`sudo mount /dev/nfs-vg/lv-opt /mnt/opt/`
 
-#### 18 - *Mount /var/www/html on apps-lv logical volume*
+#### 15 - *Update /etc/fstab file so that the mount configuration will persist (not lost) after restart of the server and The UUID of the device will be used to update the /etc/fstab file*
 
-`sudo mount /dev/webdata-vg/apps-lv /var/www/html/`
+`sudo blkid /dev/nfs-vg/*` - *copy the UUID of the 3*
 
-#### 19 - *Using rsync utility to backup all the files in the log directory /var/log into /home/recovery/logs (We must do this before mounting the file system)*
+![NFSDeviceUUID](./Images/nfsdeviceuuid.png)
 
-`sudo rsync -av /var/log/. /home/recovery/logs/` 
+`sudo vi /etc/fstab` - *To update /etc/fstab, we type in # mounts for wordpress nfsserver, then edit (/dev/mapper/lv-apps UUID, /dev/mappe
+r/lv-logs UUID and /dev/mapper/lv-opt UUID), and remove ending quotes*
 
-#### 20 - *Mount /var/log on logs-lv logical volume. (Note that all the existing data on /var/log will be deleted. That is why step 16 above is very important)*
+![Edited nfsDeviceUUID](./Images/nfs%20etc.fstab.png)
 
-`sudo mount /dev/webdata-vg/logs-lv /var/log` 
+`sudo mount -a` - *run to confirm successful configuration without error msg*
 
-#### 21 - *Restore log files back into /var/log directory*
+`df -h` - *run to view mounted LV*
 
-`sudo rsync -av /home/recovery/logs/. /var/log`
+![Lv Mounted](./Images/LVMounted.png)
 
-#### 22 - *Update /etc/fstab file so that the mount configuration will persist (not lost) after restart of the server and The UUID of the device will be used to update the /etc/fstab file*
+#### 16 - *Install NFS server, configure it to start on reboot and make sure it is up and running*
 
-`sudo blkid`
+`sudo yum update -y`
 
-![DeviceUUID](./Images/DeviceUUID.PNG)
+`sudo yum install nfs-utils -y`
 
-`sudo vi /etc/fstab` - *To update /etc/fstab, we type in # mounts for wordpress webserver, then edit (/dev/mapper/webdata--vg-apps--lv UUID and /dev/mapper/webdata--vg-logs--lv UUID), and remove ending quotes*
+`sudo systemctl start nfs-server.service`
 
-![Edited DeviceUUID](./Images/EditedDeviceUUID.PNG)
+`sudo systemctl enable nfs-server.service`
 
-#### 22 - *To test the configuration and reload the daemon*
+`sudo systemctl status nfs-server.service`
 
-`sudo mount -a`
+![NFSServer Status](./Images/NFS%20Server%20Status.png)
 
-`sudo systemctl daemon-reload`
+#### 21 - *Export the mounts for webservers’ subnet cidr to connect as clients. For simplicity, you will install your all three Web Servers inside the same subnet, but in production set up you would probably want to separate each tier inside its own subnet for higher level of security. To check your subnet cidr – open your EC2 details in AWS web console and locate ‘Networking’ tab and open a Subnet link. - But before we export, Make sure we set up permission that will allow our Web servers to read, write and execute files on NFS:
 
-#### 23 - *Verifying your setup by running df -h, output must look like this*
+`sudo chown -R nobody: /mnt/apps`
 
-`df -h`
+`sudo chown -R nobody: /mnt/logs`
 
-![Setup Verified](./Images/Setup%20Verified.PNG)
+`sudo chown -R nobody: /mnt/opt`
 
-## STEP 2 — *Prepare the Database Server*
+`sudo chmod -R 777 /mnt/apps`
 
-#### 1 *Launched an EC2 instance that will serve as "Database Server" earlier. Create 3 volumes in the same AZ as your Web Server EC2, each of 10 GiB*
+`sudo chmod -R 777 /mnt/logs`
 
-![Ec2Instance DBServer](./Images/EC2%20Instances%20DBServer.PNG)
+`sudo chmod -R 777 /mnt/opt`
 
-![Volume DBServer](./Images/3Volume%20DBServer.PNG)
+`ll /mnt` - run to confirm change
 
-#### 2 *Connecting Database-server to instance*
+*Configure access to NFS for clients within the same subnet (example of Subnet CIDR – 172.31.80.0/20 ):*
 
-`ssh -i "project-6.pem" ec2-user@ec2-34-207-237-133.compute-1.amazonaws.com`
+`sudo vi /etc/exports`
 
-#### 3  - *Using lsblk command to inspect what block devices are attached to server.Notice names of your newly created devices. All devices in Linux reside in /dev/ directory. Inspect it with ls /dev/ and make sure you see all 3 newly created block devices there – their names will likely be xvdf, xvdh, xvdg*
+`/mnt/apps 172.31.80.0/20(rw,sync,no_all_squash,no_root_squash)`
 
-`lsblk`
+`/mnt/logs 172.31.80.0/20(rw,sync,no_all_squash,no_root_squash)`
 
-![DBblockdevice attached](./Images/DBblockdevice%20attached.PNG)
+`/mnt/opt 172.31.80.0/20(rw,sync,no_all_squash,no_root_squash)`
 
-#### 4 - *Using df -h command to see all mounts and free space on your server*
+`ESC + :wqa!` - run to save and exit
 
-`df -h` 
+`sudo exportfs -arv` - run to export
 
-![DBMountSpace Avail](./Images/DBMountSpace%20Avail.PNG)
+*Check which port is used by NFS and open it using Security Groups (we already added the Inbound Rules during our nfs-server ec2 instance setup)*
 
-#### 5 - *Using gdisk utility to create a single partition on each of the 3 (xvdf xvdg xvdh) disks*
+`rpcinfo -p | grep nfs`
 
-`sudo gdisk /dev/xvdf` 
+![NFS Port](./Images/NFS%20port.png)
 
-`?` - *shows help listing of all command*
+*we have to add inbound rule for the nfs server port tcp 2049 if you have not already, then restart nfs server*
 
-`n` - *enter n to add a new partition*
+`sudo systemctl restart nfs-server`
 
-`1` - *to select default*
+## STEP 2 — *Configure The Database Server*
 
-`enter` - *first sector*
+#### 1 *Launched an EC2 instance that will serve as "Database Server" we added inbound rule MYSQL/Aurora TCP 3306, and allowed 1 volume of 8 GiB*
 
-`enter` - *displays Last sector*
+![Ec2Instance Database](./Images/Database%20Server%20EC2.png)
 
-`8E00`
+![Volume Database](./Images/Database%20Volume.png)
 
-`p` - *to preview*
+#### 2 *Connect to database server EC2 Instance using the publicIP*
 
-`w` - *to write*
+`ssh -i "Project7.pem" ubuntu@3.84.13.141`  - publicIP
 
-`y` - *to complete partition*
+`sudo apt update`
 
-`sudo gdisk /dev/xvdg` 
+#### 3 *Install MySql Server*
 
-`?` - *shows help listing of all command*
+`sudo apt install mysql-server -y` - had error E maybe I changed a new system: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing
 
-`n` - *enter n to add a new partition*
+`sudo apt-get install --fix-missing` - fixed error with this code
 
-`1` - *to select default*
+`sudo apt install mysql-server -y` - resolved 
 
-`enter` - *first sector*
+`sudo service mysql status`
 
-`enter` - *displays Last sector*
+![MYSQL Status](./Images/MYSQL%20Status.png)
 
-`8E00`
+#### 4   *we will Create a database and name it tooling, Create a database user and name it webaccess, Grant permission to webaccess user on tooling database to do anything only from the webservers subnet cidr*
 
-`p` - *to preview*
+`sudo mysql;`
 
-`w` - *to write*
+mysql> `create database tooling` 
 
-`y` - *to complete partition*
+->     `;`
 
-`sudo gdisk /dev/xvdh` 
+mysql> `create user 'webaccess'@'%' identified with mysql_native_password by 'password'; `
 
-`?` - *shows help listing of all command*
+*Grant permission to webaccess user on tooling database to do anything only from the webservers subnet cidr*
 
-`n` - *enter n to add a new partition*
+mysql> `grant all privileges on tooling.* to 'webaccess'@'%';`
 
-`1` - *to select default*
+mysql> `FLUSH PRIVILEGES;`
 
-`enter` - *first sector*
+mysql> `show databases;`
 
-`enter` - *displays Last sector*
+mysql> `EXIT;`
 
-`8E00`
+*Edit **bind address** to 0.0.0.0 to allow all access* 
 
-`p` - *to preview*
+`sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf`
 
-`w` - *to write*
+`sudo systemctl restart mysql` - *restart mysql*
 
-`y` - *to complete partition*
+## STEP 3 — *Prepare 3 Web Servers but we used 2 Web Servers for this project*
 
+#### 1  - *Prepare the Web Servers to serve the same content from shared storage solutions (NFS Server and MySQL database), already one DB can be accessed for reads and writes by multiple clients. For storing shared files that our Web Servers will use – we will utilize NFS and mount previously created Logical Volume lv-apps to the folder where Apache stores files to be served to the users (/var/www). This will allow us add or remove new ones at will and ensure data integrity on NFS and DB making our webservers stateless*. 
 
-#### 6 - *Using lsblk utility to view the newly configured partition on each of the 3 disks*
+*Launch 3 new webservers EC2 instance with RHEL 8 Operating System*
 
-`lsblk` 
+*Edit inbound rule in the security group and add HTTP port 80*
 
-![DBdiskPartition Created](./Images/DBdiskPartition%20Created.PNG)
+#### - Web Server1
 
-#### 7 - *Installing lvm2 package using sudo yum install lvm2. Run sudo lvmdiskscan command to check for available partitions. Note: RedHat uses yum to install whereas ubuntu uses apt*
+`ssh -i "Project7.pem" ec2-user@ec2-3-84-16-20.compute-1.amazonaws.com`  
 
-`sudo yum install lvm2 -y`
+*so we will use shellscript to configure/ install NFS client, Mount /var/www/ and target the NFS server’s export for apps, install Remi's Repository, Apache amd PHP to replicate same on other web servers while editing IP to the (NFS Server Private IP addresses) *
 
-`sudo lvmdiskscan` 
+`sudo vi shell.sh && sudo chmod +x shell.sh`
 
-#### 8 - *Using pvcreate utility to mark each of 3 disks as physical volumes (PVs) to be used by LVM*
+`#!/bin/bash`
+`sudo yum install nfs-utils nfs4-acl-tools -y`
+`sudo mkdir /var/www`
+`sudo mount -t nfs -o rw,nosuid 172.31.86.215:/mnt/apps /var/www` - *sudo mount -t nfs -o rw,nosuid <NFS-Server-Private-IP-Address>:/mnt/apps /var/www*
+`sudo echo "172.31.86.215:/mnt/apps /var/www    nfs defaults  0 0"  >> /etc/fstab` - *<NFS-Server-Private-IP-Address>:/mnt/apps /var/www nfs defaults 0 0*
 
-`sudo pvcreate /dev/xvdf1 /dev/xvdg1 /dev/xvdh1` 
+`sudo yum install httpd -y`
 
-#### 9 - *Verifying that your Physical volume has been created successfully by running sudo pvs*
+`sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y`
 
-`sudo pvs` 
+`sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm -y`
 
-![DBphysicalvolume](./Images/DBphysicalvolume.PNG)
+`sudo dnf module reset php -y`
 
-#### 10 - *Using vgcreate utility to add all 3 PVs to a volume group (VG). Name the VG webdata-vg*
+`sudo dnf module enable php:remi-7.4 -y`
 
-`sudo vgcreate webdata-vg /dev/xvdf1 /dev/xvdg1 /dev/xvdh1` 
-
-#### 11 - *Verifying that your VG has been created successfully by running sudo vgs*
-
-`sudo vgs`
-
-![DBVolumeGroup](./Images/DBVolumeGroup.PNG)
-
-#### 12 - *Using lvcreate utility to create 2 logical volumes. db-lv (Use half of the PV size - 29.99g/2 = 14G), and logs-lv Use the remaining space of the PV size. NOTE: apps-lv is used to store data for the Website while, logs-lv is used to store data for logs.*
-
-`sudo lvcreate -n db-lv -L 9G webdata-vg` 
-
-`sudo lvcreate -n logs-lv -L 8G webdata-vg`
-
-#### 13 - *Verifying  that your Logical Volume has been created successfully by running sudo lvs*
-
-`sudo lvs` 
-
-![DBLogicalVolume](./Images/DBLogicalVolume.PNG)
-
-#### 14 - *Verifying  the entire setup*
-
-`sudo vgdisplay -v #view complete setup - VG, PV, and LV` 
-
-`sudo lsblk ` 
-
-![DBEntireSetup](./Images/DBEntireSetup.PNG)
-
-#### 15 - *Using mkfs.ext4 to format the logical volumes with ext4 filesystem*
-
-`sudo mkfs -t ext4 /dev/webdata-vg/db-lv` 
-
-`sudo mkfs -t ext4 /dev/webdata-vg/logs-lv` 
-
-#### 16 - *Creating /db directory to store website files and Mount /home/recovery/logs to store backup of log data*
-
-`sudo mkdir -p /home/recovery/log && sudo rsync -av /var/log /home/recovery/log`
-
-`sudo mkdir /db && sudo mount /dev/webdata-vg/db-lv /db`
-
-`sudo mount /dev/webdata-vg/logs-lv /var/log`
-
-`sudo rsync -av /home/recovery/log/ /var/log` 
-
-#### 18 - *Update /etc/fstab file so that the mount configuration will persist after restart of the server and The UUID of the device will be used to update the /etc/fstab file`*
-
-`sudo blkid /dev/webdata-vg/*`
-
-![DBDeviceUUID](./Images/DBDeviceUUID.PNG)
-
-`sudo vi /etc/fstab` - *To update /etc/fstab, we type in # mounts for wordpress webserver, then edit (/dev/mapper/webdata--vg-db--lv UUID and /dev/mapper/webdata--vg-logs--lv UUID), and remove ending quotes*
-
-![Edited dblogsUUID](./Images/EditedDBlogsUUID.PNG)
-
-#### 22 - *To test the configuration and reload the daemon*
-
-`sudo mount -a`
-
-`sudo systemctl daemon-reload`
-
-#### 23 - *Verifying your setup by running df -h, output must look like this*
-
-`df -h`
-
-![DBSetup Verified](./Images/DBSetup%20Verified.PNG)
-
-## STEP 3 — *To Install WordPress on your Web Server EC2*
-
-#### 1 - *To Update the repository*
-
-`sudo yum -y update` 
-
-#### 2 - *To Install wget, Apache and it’s dependencies*
-
-`sudo yum -y install wget httpd php php-mysqlnd php-fpm php-json` 
-
-#### 3 - *To Start Apache*
-
-`sudo systemctl enable httpd`
-
-`sudo systemctl start httpd`
-
-#### 4 - *To install PHP and it’s depemdencies*
-
-`sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm`
-
-`sudo yum install yum-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm`
-
-`sudo yum module list php`
-
-`sudo yum module reset php`
-
-`sudo yum module enable php:remi-7.4`
-
-`sudo yum install php php-opcache php-gd php-curl php-mysqlnd`
+`sudo dnf install php php-opcache php-gd php-curl php-mysqlnd -y`
 
 `sudo systemctl start php-fpm`
 
 `sudo systemctl enable php-fpm`
 
-`sudo setsebool -P httpd_execmem 1`
+`setsebool -P httpd_execmem 1`
+
+`sudo systemctl status php-fpm`
+
+`:wqa!`
+
+`ll` - to see where shell.sh path is
+
+`sudo su` - to change to root ip user
+
+`./shell.sh` - run shell script
+
+![Web1PHP-fpm Status](./Images/Web1PHP-fpm%20Status.png)
+
+`df -h` - *to verify NFS was mounted successfully* 
+
+`sudo systemctl status php-fpm`
+
+#### Web Server2
+
+Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
+
+`ssh -i "Project7.pem" ec2-user@ec2-34-201-66-96.compute-1.amazonaws.com` - Web Server2 
+
+`sudo vi shell.sh && sudo chmod +x shell.sh`
+
+`#!/bin/bash`
+`sudo yum install nfs-utils nfs4-acl-tools -y`
+`sudo mkdir /var/www`
+`sudo mount -t nfs -o rw,nosuid 172.31.86.215:/mnt/apps /var/www` - *sudo mount -t nfs -o rw,nosuid <NFS-Server-Private-IP-Address>:/mnt/apps /var/www*
+`sudo echo "172.31.86.215:/mnt/apps /var/www    nfs defaults  0 0"  >> /etc/fstab` - *<NFS-Server-Private-IP-Address>:/mnt/apps /var/www nfs defaults 0 0*
+
+`sudo yum install httpd -y`
+
+`sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y`
+
+`sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm -y`
+
+`sudo dnf module reset php -y`
+
+`sudo dnf module enable php:remi-7.4 -y`
+
+`sudo dnf install php php-opcache php-gd php-curl php-mysqlnd -y`
+
+`sudo systemctl start php-fpm`
+
+`sudo systemctl enable php-fpm`
+
+`setsebool -P httpd_execmem 1`
+
+`sudo systemctl status php-fpm`
+
+`:wqa!`
+
+`ll` - to see where shell.sh path is
+
+`sudo su` - to change to root ip user
+
+`./shell.sh` - run shell script
+
+![Web2PHP-fpm Status](./Images/Web2PHP-fpm%20Status.png)
 
 #### 5 - *To Restart Apache*
 
-`sudo systemctl restart httpd`
+`sudo systemctl status php-fpm`
 
-#### 6 - *To Download wordpress and copy wordpress to /var/www/html*
+#### 2 - *Verify that Apache files and directories are available on the both Web Servers in /var/www and also on the NFS server in /mnt/apps. If you see the same files – it means NFS is mounted correctly.
 
-`mkdir wordpress && cd wordpress`
+`cd /var/www/html` - *on Web Server1*
 
-`sudo wget http://wordpress.org/latest.tar.gz`
+`touch proj`
 
 `ls`
+
+`cd /var/www/html` - *on Web Server2*
+
+`ls` - You should able to see *proj* file created on Web Server2 else nfs server not mounted properly.
+
+`echo Hello >> proj` - *on Web Server1*
+
+`ls`
+
+`cat proj` - *on Web Server2, you should see "Hello"*
+
+`rm proj` - *further action on Web Server1 and see same result of Web Server2*
+
+![Nfs Mount VerifiedWeb1](./Images/NFS%20Mount%20Verified%20Web1.png)
+
+![NFS MountVerifiedWeb2](./Images/NFS%20Mount%20Verified%20Web2.png)
+
+#### 3 - *Fork the tooling source code from Bethrand Github Account to your Github account*
+
+`sudo yum install git`
+
+`git clone https://github.com/Bethrand/tooling.git`
+
+`ls`
+
+`cd tooling`
+
+`ls`
+
+#### 4 *We will Deploy the tooling website’s code to the Webserver. Then ensure that the html folder from the repository is deployed to /var/www/html*
 
 `cd ..`
 
-`sudo mv wordpress /var/www/html`
-
-`cd /var/www/html/`
+`mv tooling/* .`
 
 `ls`
 
-`cd wordpress/`
+`ls tooling`
 
 `ls`
 
-`sudo tar -xzvf latest.tar.gz`
+`sudo rm -r tooling`
+
+`ls html`
+
+`mv html/* .` - *move html file into our html directory*
+
+`ls html`
 
 `ls`
 
-`sudo rm latest.tar.gz`
-
-`cd ..`
+`sudo rm -r html` - *to delete the empty html file*
 
 `ls`
 
-`sudo mv wordpress/ wp`
+`sudo yum install mysql`
 
-`cd ..`
+#### 5 - *Update the website’s configuration to connect to the database (in /var/www/html/functions.php file)*. *Apply tooling-db.sql script to your database using this command mysql -h <databse-private-ip> -u <db-username> -p <db-pasword> < tooling-db.sql* // connect to database $db = mysqli_connect('172.31.88.16', 'webaccess', 'password', 'tooling');*
 
-`sudo mv wordpress/wp/ .`
+`vi functions.php` - *on Web Server1*
 
-`ls`
+####  6 - *Create in MySQL a new admin user with username: myuser and password: password: then INSERT INTO ‘users’ (‘id’, ‘username’, ‘password’, ’email’, ‘user_type’, ‘status’) VALUES -> (1, ‘myuser’, ‘5f4dcc3b5aa765d61d8327deb882cf99’, ‘user@mail.com’, ‘admin’, ‘1’);*
 
-`ls wordpress/`
+`mysql -u webaccess -ppassword -h 172.31.88.16` - *web Server1 terminal*
 
-`sudo rm -r wordpress/`
+`mysql -u webaccess -ppassword -h 172.31.88.16 tooling`
 
-`ls`
+`show databases;`
 
- `sudo mv wp wordpress`
+`select * from users;`
 
-`cd wordpress/`
+`exit;`
 
-`ls`
+####  7 - *disable SELinux sudo setenforce 0 To make this change permanent – open following config file sudo vi /etc/sysconfig/selinux and set SELINUX=disabled then restart httpd.*
 
-`sudo cp wp-config-sample.php wp-config.php`
+`sudo setenforce 0` - *on Web Server1 & Web Server2*
 
-`ls`
+`sudo vi /etc/sysconfig/selinux` - *on both web Servers1 & 2 set SELINUX=enforcing to set SELINUX=disabled*
 
-#### 7 - *To Configure SELinux Policies*
+`sudo systemctl restart httpd` - * on Web Server1 & 2*
 
-`sudo chown -R apache:apache /var/www/html/wordpress`
+####  7 - *Open the website in your browser http://<Web-Server-Public-IP-Address-or-Public-DNS-Name>/index.php and make sure you can login into the website with myuser user.*
 
-`sudo chcon -t httpd_sys_rw_content_t /var/www/html/wordpress -R`
+*WEB SERVER 1 SUCCESSFUL*
 
-`sudo setsebool -P httpd_can_network_connect=1`
+![Web Server1 Success](./Images/Web%20Server1%20Success.png)
 
-## STEP 4 — *To Install MySQL on our DB Server EC2*
+*WEB SERVER 2 SUCCESSFUL*
 
-`ls /`
+![Web Server2 Success](./Images/Web%20Server2%20Success.png)
 
-`sudo yum update`
-
-`sudo yum install mysql-server`
-
-`sudo systemctl status mysqld` - *to ensure server is running*
-
-![DBServer Inactive](./Images/DBServer%20Inactive.PNG)
-
-*DBServer Not running - Restart*
-
-`sudo systemctl restart mysqld`
-
-`sudo systemctl enable mysqld`
-
-*Check Status to see if DBServer now runs*
-
-`sudo systemctl status mysqld`
-
-![DBServer Active](./Images/DBServer%20Active.PNG)
-
-## STEP 5 — *To Configure DB to work with WordPress*
-
-`sudo mysql`
-
-`CREATE DATABASE wordpress;`
-
-`mysql> CREATE USER "wordpress"@"%" IDENTIFIED BY 'password1';` - *"%" means allow on all port but you can specify web server Private IP address*
-
-`GRANT ALL ON wordpress.* TO "wordpress"@"%";` - *"%" means allow on all port but you can specify Webserver private IP address*
-
-`FLUSH PRIVILEGES;`
-
-`SHOW DATABASES;`
-
-`exit`
-
-## STEP 6 — *To Configure WordPress to connect to remote database; we open MySQL port 3306 on DB Server EC2. For extra security, we allow access to the DB server ONLY from our Web Server’s Private IP address, so in the Inbound Rule configuration we will specify source as /32*
-
-![DBServer Inboundrule](./Images/DB%20Inboundrule.PNG)
-
-`sudo vi /etc/my.cnf` - *to insert bind-address = 0.0.0.0 to allow all access to port*
-
-`sudo systemctl restart mysqld`
-
-#### 1 - *On Webserver Terminal, Install MySQL client and test that you can connect from your Web Server to your DB server by using mysql-client*
-
-`cd /var/www/html`
-
-`cd wordpress/`
-
-`sudo yum install mysql -y`
-
-`sudo mysql -u wordpress -ppassword1 -h 172.31.48.203` - *DB Private IP address*
-
-`password1`
-
-#### 2 - *To Verify to ensure we can execute SHOW DATABASES; command and view list of existing databases*
-
-`SHOW DATABASES;`
-
-![SHOW DATABASES](./Images/show%20databases.PNG)
-
-`exit`
-
-#### 3 - *We now Change permissions and configuration so Apache could use WordPress:Enable TCP port 80 in Inbound Rules configuration for your Web Server EC2 enable from everywhere 0.0.0.0/0 or from your workstation’s IP*
-
-`http://100.25.163.152/wordpress/` - *not coming up we trouble with code below, seems we omitted to run `cp wordpress/wp-config-sample.php wordpress/wp-config.php` then `cp -R wordpress /var/www/html/` above when downloading wordpress and copying to var/www/html*
-
-`sudo vi wp-config.php` - *Due to to edit DB-NAME (wordpress) DB-USERNAME (wordpress), DB-Password (password1) & DB-Host (172.31.48.203)*
-To avoid this route; do `cp wordpress/wp-config-sample.php wordpress/wp-config.php` then `cp -R wordpress /var/www/html/`
-
-#### 4 - *We try to access from our browser the link to our wordpress 'http://web-server-public-IP-Address/wordpress/'*
-
-`http://100.25.163.152/wordpress/` 
-
-![RemoteDB ConnectionSuccess](./Images/RemoteDB%20ConnectionSuccess.PNG)
-
-![RemoteDB Connection](./Images/RemoteDB%20Connection.PNG)
-
-![RemoteDB ConnectedSuccessfully](./Images/RemoteDB%20ConnectedSuccessfully.PNG)
-
-![RemoteDBWordpress Completed](./Images/RemoteDBWordpress%20Completed.PNG)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-..
-;h;gkv,kkxvmvkkl
