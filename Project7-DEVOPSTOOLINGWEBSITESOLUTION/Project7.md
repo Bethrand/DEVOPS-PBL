@@ -154,7 +154,7 @@ r/lv-logs UUID and /dev/mapper/lv-opt UUID), and remove ending quotes*
 
 ![Lv Mounted](./Images/LVMounted.png)
 
-#### 16 - *Install NFS server, configure it to start on reboot and make sure it is up and running*
+#### 16 - *Install NFS server, configure it to start on reboot and ensure it is up and running*
 
 `sudo yum update -y`
 
@@ -168,7 +168,7 @@ r/lv-logs UUID and /dev/mapper/lv-opt UUID), and remove ending quotes*
 
 ![NFSServer Status](./Images/NFS%20Server%20Status.png)
 
-#### 21 - *Export the mounts for webservers’ subnet cidr to connect as clients. For simplicity, you will install your all three Web Servers inside the same subnet, but in production set up you would probably want to separate each tier inside its own subnet for higher level of security. To check your subnet cidr – open your EC2 details in AWS web console and locate ‘Networking’ tab and open a Subnet link. - But before we export, Make sure we set up permission that will allow our Web servers to read, write and execute files on NFS:
+#### 21 - *Export the mounts for the webservers subnet cidr to connect as clients. For simplicity, you will install your all three Web Servers inside the same subnet, but in production set up you would probably want to separate each tier inside its own subnet for higher level of security. To check your subnet cidr – open your EC2 details in AWS web console and locate ‘Networking’ tab and open a Subnet link. - But before we export, Make sure we set up permission that will allow our Web servers to read, write and execute files on NFS:
 
 `sudo chown -R nobody: /mnt/apps`
 
