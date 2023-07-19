@@ -1,4 +1,4 @@
-# **Project 7: DEVOPS (Single) TOOLING WEB SOLUTION  - We will implement a web solution for a DevOps team using LAMP stack with remote Database and NFS servers which will consist of following components:
+# **Project 7: DEVOPS (Single) TOOLING WEB SOLUTION  - We will implement a tooling web solution which makes access to DevOps tools within the corporate infrastructure easily accessible for the DevOps team using LAMP stack with remote Database and NFS servers which will consist of following components:
 *Infrastructure: AWS, Webserver Linux: Red Hat Enterprise Linux 8, Database Server: Ubuntu 20.04 + MySQL, Storage Server: Red Hat Enterprise Linux 8 + NFS Server, Programming Language: PHP, Code Repository: GitHub*
 
 ## STEP 1 — *Prepare a NFS Server*
