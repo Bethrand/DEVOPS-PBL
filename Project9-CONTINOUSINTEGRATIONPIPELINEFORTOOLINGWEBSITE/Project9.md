@@ -142,6 +142,8 @@ lets make a change on test jenkins we added in the github README.md file and com
 
 ##### V - *To make sure that the files in /mnt/apps have been updated – connect via SSH/Putty to your NFS server and check README.MD file*
 
+`ls`
+
 `ls /mnt/apps`
 
 `cat /mnt/apps/README.md`
