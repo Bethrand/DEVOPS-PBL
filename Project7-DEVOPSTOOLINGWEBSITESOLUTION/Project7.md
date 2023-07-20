@@ -266,7 +266,7 @@ mysql> `EXIT;`
 
 *Edit inbound rule in the security group and add HTTP port 80*
 
-#### - Web Server1
+#### 2 - Web Server1
 
 `ssh -i "Project7.pem" ec2-user@ec2-3-84-16-20.compute-1.amazonaws.com`  
 
@@ -298,6 +298,8 @@ mysql> `EXIT;`
 
 `setsebool -P httpd_execmem 1`
 
+`sudo systemctl status php-fpm`
+
 `:wqa!`
 
 `ll` - to see where shell.sh path is
@@ -312,7 +314,7 @@ mysql> `EXIT;`
 
 `sudo systemctl status php-fpm`
 
-#### Web Server2
+#### 3 - Web Server2 repeat same as Web1
 
 Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
 
@@ -356,11 +358,11 @@ Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
 
 ![Web2PHP-fpm Status](./Images/Web2PHP-fpm%20Status.png)
 
-#### 5 - *To Restart Apache*
+#### 4 - *To Restart Apache*
 
 `sudo systemctl status php-fpm`
 
-#### 2 - *Verify that Apache files and directories are available on the both Web Servers in /var/www and also on the NFS server in /mnt/apps. If you see the same files – it means NFS is mounted correctly.
+#### 5 - *Verify that Apache files and directories are available on the both Web Servers in /var/www and also on the NFS server in /mnt/apps. If you see the same files – it means NFS is mounted correctly.
 
 `cd /var/www/html` - *on Web Server1*
 
@@ -384,7 +386,7 @@ Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
 
 ![NFS MountVerifiedWeb2](./Images/NFS%20Mount%20Verified%20Web2.png)
 
-#### 3 - *Fork the tooling source code from Bethrand Github Account to your Github account*
+#### 6 - *Fork the tooling source code from Bethrand Github Account to your Github account*
 
 `sudo yum install git`
 
@@ -396,7 +398,7 @@ Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
 
 `ls`
 
-#### 4 *We will Deploy the tooling website’s code to the Webserver. Then ensure that the html folder from the repository is deployed to /var/www/html*
+#### 7 *We will Deploy the tooling website’s code to the Webserver. Then ensure that the html folder from the repository is deployed to /var/www/html*
 
 `cd ..`
 
@@ -414,6 +416,8 @@ Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
 
 `mv html/* .` - *move html file into our html directory*
 
+`yes`
+
 `ls html`
 
 `ls`
@@ -424,15 +428,15 @@ Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
 
 `sudo yum install mysql`
 
-#### 5 - *Update the website’s configuration to connect to the database (in /var/www/html/functions.php file)*. *Apply tooling-db.sql script to your database using this command mysql -h <databse-private-ip> -u <db-username> -p <db-pasword> < tooling-db.sql* // connect to database $db = mysqli_connect('172.31.88.16', 'webaccess', 'password', 'tooling');*
+`yes`
+
+#### 8 - *Update the website’s configuration to connect to the database (in /var/www/html/functions.php file)*. *Apply tooling-db.sql script to your database using this command mysql -h <databse-private-ip> -u <db-username> -p <db-pasword> < tooling-db.sql* // connect to database $db = mysqli_connect('172.31.88.16', 'webaccess', 'password', 'tooling');*
 
 `vi functions.php` - *on Web Server1*
 
-####  6 - *Create in MySQL a new admin user with username: myuser and password: password: then INSERT INTO ‘users’ (‘id’, ‘username’, ‘password’, ’email’, ‘user_type’, ‘status’) VALUES -> (1, ‘myuser’, ‘5f4dcc3b5aa765d61d8327deb882cf99’, ‘user@mail.com’, ‘admin’, ‘1’);*
+####  9 - *Create in MySQL a new admin user with username: myuser and password: password: then INSERT INTO ‘users’ (‘id’, ‘username’, ‘password’, ’email’, ‘user_type’, ‘status’) VALUES -> (1, ‘myuser’, ‘5f4dcc3b5aa765d61d8327deb882cf99’, ‘user@mail.com’, ‘admin’, ‘1’);*
 
-`mysql -u webaccess -ppassword -h 172.31.88.16` - *web Server1 terminal*
-
-`mysql -u webaccess -ppassword -h 172.31.88.16 tooling`
+`mysql -u webaccess -ppassword -h 172.31.88.16 tooling` - *web Server1 terminal*
 
 `show databases;`
 
@@ -440,15 +444,15 @@ Launch webserver1 P7 EC2 instance with RHEL 8 Operating System
 
 `exit;`
 
-####  7 - *disable SELinux sudo setenforce 0 To make this change permanent – open following config file sudo vi /etc/sysconfig/selinux and set SELINUX=disabled then restart httpd.*
+####  9 - *disable SELinux sudo setenforce 0 To make this change permanent – open following config file sudo vi /etc/sysconfig/selinux and set SELINUX=disabled then restart httpd.*
 
 `sudo setenforce 0` - *on Web Server1 & Web Server2*
 
-`sudo vi /etc/sysconfig/selinux` - *on both web Servers1 & 2 set SELINUX=enforcing to set SELINUX=disabled*
+`sudo vi /etc/sysconfig/selinux` - *on both web Servers1 & 2 set from SELINUX=enforcing to set SELINUX=disabled*
 
 `sudo systemctl restart httpd` - * on Web Server1 & 2*
 
-####  7 - *Open the website in your browser http://<Web-Server-Public-IP-Address-or-Public-DNS-Name>/index.php and make sure you can login into the website with myuser user.*
+####  10 - *Open the website in your browser http://<Web-Server-Public-IP-Address-or-Public-DNS-Name>/index.php and make sure you can login into the website with myuser user.*
 
 *WEB SERVER 1 SUCCESSFUL*
 
