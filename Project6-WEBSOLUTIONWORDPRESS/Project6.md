@@ -307,7 +307,7 @@
 
 ![DBVolumeGroup](./Images/DBVolumeGroup.PNG)
 
-#### 12 - *Using lvcreate utility to create 2 logical volumes. db-lv (Use half of the PV size - 29.99g/2 = 14G), and logs-lv Use the remaining space of the PV size. NOTE: apps-lv is used to store data for the Website while, logs-lv is used to store data for logs.*
+#### 12 - *Using lvcreate utility, create 2 logical volumes. db-lv (Use half of the PV size - 29.99g/2 = 14G), and logs-lv Use the remaining space of the PV size. NOTE: apps-lv is used to store data for the Website while, logs-lv is used to store data for logs.*
 
 `sudo lvcreate -n db-lv -L 9G webdata-vg` 
 
@@ -456,6 +456,8 @@
 `ls`
 
 `sudo cp wp-config-sample.php wp-config.php`
+
+`ls`
 
 `ls`
 
