@@ -1,4 +1,4 @@
-# **Project 7: DEVOPS (Single) TOOLING WEB SOLUTION  - We will implement a tooling web solution which makes access to DevOps tools within the corporate infrastructure easily accessible for the DevOps team using LAMP stack with remote Database and NFS servers which will consist of following components:
+# **Project 7: DEVOPS (Single) TOOLING WEB SOLUTION  - We will implement a tooling web solution which makes access to Devops tools within the corporate infrastructure easily accessible for the Devops team using LAMP stack with remote Database and NFS servers which will consist of following components:
 *Infrastructure: AWS, Webserver Linux: Red Hat Enterprise Linux 8, Database Server: Ubuntu 20.04 + MySQL, Storage Server: Red Hat Enterprise Linux 8 + NFS Server, Programming Language: PHP, Code Repository: GitHub*
 
 ## STEP 1 — *Prepare a NFS Server*
@@ -11,7 +11,7 @@
 
 #### 2 *Connecting NFS-server to instance*
 
-`ssh -i "Project7.pem" ubuntu@3.92.185.188` - publicIP
+`ssh -i "Project7.pem" ec2-user@3.92.185.188` - publicIP
 
 #### 3  - *NOW TO CONFIGURE LVM (logical Volume) on the NFS Server; Use lsblk command to inspect what block devices are attached to server. Notice names of your newly created devices. All devices in Linux reside in /dev/ directory. Inspect it with ls /dev/ and make sure you see all 2 newly created block devices there – their names will likely be xvdb, xvdc. This xvda is default*
 
@@ -143,8 +143,8 @@
 
 ![NFSDeviceUUID](./Images/nfsdeviceuuid.png)
 
-`sudo vi /etc/fstab` - *To update /etc/fstab, we type in # mounts for wordpress nfsserver, then edit (/dev/mapper/lv-apps UUID, /dev/mappe
-r/lv-logs UUID and /dev/mapper/lv-opt UUID), and remove ending quotes*
+`sudo vi /etc/fstab` - *To update /etc/fstab, we type in # mounts for wordpress nfsserver, then edit (/dev/mapper/lv-apps UUID to /mnt/apps, /dev/mappe
+r/lv-logs UUID to /mnt/logs and /dev/mapper/lv-opt UUID to /mnt/opt), and remove ending quotes*
 
 ![Edited nfsDeviceUUID](./Images/nfs%20etc.fstab.png)
 
@@ -204,13 +204,13 @@ r/lv-logs UUID and /dev/mapper/lv-opt UUID), and remove ending quotes*
 
 ![NFS Port](./Images/NFS%20port.png)
 
-*we have to add inbound rule for the nfs server port tcp 2049 if you have not already, then restart nfs server*
+*you have to add inbound rule for the nfs server port tcp 2049 if you have not already, then restart nfs server*
 
 `sudo systemctl restart nfs-server`
 
 ## STEP 2 — *Configure The Database Server*
 
-#### 1 *Launched an EC2 instance that will serve as "Database Server" we added inbound rule MYSQL/Aurora TCP 3306, and allowed 1 volume of 8 GiB*
+#### 1 *Launched an EC2 instance on ubuntu 20.04 that will serve as "Database Server" we added inbound rule MYSQL/Aurora TCP 3306, and allowed 1 volume of 8 GiB*
 
 ![Ec2Instance Database](./Images/Database%20Server%20EC2.png)
 
@@ -238,9 +238,7 @@ r/lv-logs UUID and /dev/mapper/lv-opt UUID), and remove ending quotes*
 
 `sudo mysql;`
 
-mysql> `create database tooling` 
-
-->     `;`
+mysql> `create database tooling;` 
 
 mysql> `create user 'webaccess'@'%' identified with mysql_native_password by 'password'; `
 
@@ -299,8 +297,6 @@ mysql> `EXIT;`
 `sudo systemctl enable php-fpm`
 
 `setsebool -P httpd_execmem 1`
-
-`sudo systemctl status php-fpm`
 
 `:wqa!`
 
