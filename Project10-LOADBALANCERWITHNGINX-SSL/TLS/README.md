@@ -6,7 +6,7 @@
 
 2. Search/lookup Elastic IP Address on AWS - Add new tag (key: Name, Value: NginxLB) - Allocate - Elastic IP Addresses - Actions - chk box - Actions - Associate Elastic IP Address - instance - choose an instance (NginxLB Instance) - Associate.
 
-Search Route 53 on AWS to Set up a domain - open a new tab - Registered Domains - Choose a domain name - Hosted zones - Click on your Hosted zone name - create 1st record as ugosuji.click - paste Elastic IP of NginxLB - create records - Create a 2nd record add www to ugosuji.click - create records
+Search Route 53 on AWS to Set up a domain - open a new tab - Registered Domains - Choose a domain name - Hosted zones - Click on your Hosted zone name - create 1st record as bethrandosuji.click - paste Elastic IP of NginxLB - create records - Create a 2nd record add www to bethrandosuji.click - create records
 
 3. Now we have domain name and route 53 all connected together with an IP address.
 
