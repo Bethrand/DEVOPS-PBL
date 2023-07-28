@@ -226,7 +226,7 @@ if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyCon
 
 `ssh -A ubuntu@43.93.6.197`
 
-`ssh-add -l`]
+`ssh-add -l`
 
 2048 SHA256:rUynJn4w9ZE0s+x9qpFG4oTg9NpLjMf2QV3hJSFow5c downloads\PBDEV.pem (RSA)
 
