@@ -18,6 +18,8 @@ An illustration diagram of a Bastion Host serving as a VPN.
 
 #### 1. Update "Name" tag on your Jenkins Ubuntu 20.04 EC2 Instance port 8080 to Jenkins-Ansible. We will use this server to run playbooks. 
 
+![EC2 INSTANCE](./Images/EC2%20Instance.png)
+
 #### 2. In your GitHub account create a new repository and name it ansible-config-mgt, allow pub and create.
 
 #### 3. Install Ansible
@@ -43,8 +45,6 @@ An illustration diagram of a Bastion Host serving as a VPN.
 `sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
 
 *copy password into jenkins browser, then Install suggested plugins from server, create admin username and password and get your Jenkins server address (http://3.93.6.197/)*
-
-![JenkinsPassword Originated](./Images/Build%20StatusJenkins.png)
 
 ![JenkinsCreated](./Images/JenkinsCreated.png)
 
@@ -97,13 +97,16 @@ README.md
 ## STEP 2 — *Prepare your development environment using Visual Studio Code*
 
 #### 1. Clone down your ansible-config-mgt repo to your Jenkins-Ansible instance through your VSCode extensions and save folder within your workspace. But better to open a VSCode in a seperate window to do this. From bottom of VSCode window, raise the tab to access Terminal into your ansible-config-mgt folder.
-git clone <ansible-config-mgt repo link> on VSCode - open Remote Repo - open repo from Github - Bethrand\ansible-config-mgt -save in project folder - open (it opens in a separate vsc)
+
+To git clone https://github.com/Bethrand/ansible-config-mgt.git , use new Vscode window - open Remote Repository - open repo from Github - Bethrand\ansible-config-mgt - save in project folder - open (it's best to open in a separate vscode window and work there)
 
 ### Step 3 - *BEGIN ANSIBLE DEVELOPMENT*
 
 #### 1. In your ansible-config-mgt GitHub repository, create a new branch that will be used for development of a new feature. Tip: Give your branches descriptive and comprehensive names, for example, if you use Jira or Trello as a project management tool – include ticket number (e.g. PRJ-145) in the name of your branch and add a topic and a brief description what this branch is about – a bugfix, hotfix, feature, release (e.g. feature/prj-145-lvm)
 
-lets confirm our branch;
+let's confirm our branch;
+
+`git status`
 
 `git branch`
 
@@ -113,15 +116,15 @@ lets confirm our branch;
 
 #### 2. Checkout the newly created feature branch to your local machine and start building your code and directory structure
 
-#### 3. Create a directory and name it playbooks – it will be used to store all your playbook files. Use GIT BASH, PowerShell doesn't understand UNIX cmd on git environment
+#### 3. Create a directory and name it `playbooks` – it will be used to store all your playbook files. Use GIT BASH, PowerShell doesn't understand UNIX cmd on git environment
 
 `mkdir playbooks`
 
-#### 4. Create a directory and name it inventory – it will be used to keep your hosts organised.
+#### 4. Create a directory and name it `inventory` – it will be used to keep your hosts organised.
 
 `mkdir inventory`
 
-#### 5. Within the playbooks folder, create your first playbook file, and name it common.yml
+#### 5. Within the playbooks folder, create your first playbook file, and name it `common.yml`
 
 `cd playbooks`
 
@@ -150,21 +153,25 @@ Note: Ansible uses TCP port 22 by default, which means it needs to ssh into targ
 
 Agent pid 2338
 
-`ssh-add -k Downloads\PBDEV.pem         *-<path-to-private-key>`*
+`ssh-add -k Downloads\PBDEV.pem`          *- path-to-private-key*
 
 `ssh-add -l`
 
 `ssh -A ubuntu@3.93.6.197`
 
-`ssh-add -l`  - run to persist the key on the server
+`ssh-add -l`  - *run to persist the key on the server*
 
 2048 SHA256:rUynJn4w9ZE0s+x9qpFG4oTg9NpLjMf2QV3hJSFow5c downloads\PBDEV.pem (RSA)
 
-#### But If you need to add a new .pem key run this below we ignored this as we added:
-```
-#### 1. Open another vscode as an administrator, raise the tab from bottom of the window to access terminal.
+>OR    
 
-`cd ugosu` - the path .ssh file was installed
+#### If you need to add a new .pem key, you can run the below code. We ignored this as we added key earlier on previous projects:
+
+#### - Open another vscode as an administrator, raise the tab from bottom of the window to access terminal.
+
+> Start code from:
+
+[`cd ugosu` - the path .ssh file was installed
 
 `Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'` - to check if openssh is installed completely
 
@@ -178,13 +185,12 @@ Agent pid 2338
 
 `# Confirm the Firewall rule is configured. It should be created automatically by setup. Run the following to verify`
 
-```
 if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
 >>     Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
 >>     New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
 >> } else {
 >>     Write-Output "Firewall rule 'OpenSSH-Server-In-TCP' has been created and exists."
-``` 
+ 
 
 ` ssh-keygen -t ed25519`
 
@@ -208,7 +214,7 @@ if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyCon
 
 ` ssh-add -l`
 
-#### 2. Now, ssh into your Jenkins-Ansible server using ssh-agent. (ssh -A ubuntu@public-ip) Be mindful you must cd into path housing your downloads(.pem) Not to cd downloads. (Open another vscode to go back to your working vscode NOT as an administrator, in extensions tab install remote ssh (if you have not already), go to >< open a remote window and select SSH config file to update – select the first (/users/ugosu/.ssh/config) – edit the config to the instance you want to connect – go to >< open a remote window - select connect to host – select instance name – continue - it is best to even install remote development that has remote ssh in it to do all these. If you connect to Jenkins-Ansible instance with this, you can also connect other servers instance using their private IP address within the Jenkins-Ansible server.)
+#### - Now, ssh into your Jenkins-Ansible server using ssh-agent. (ssh -A ubuntu@public-ip) Be mindful you must cd into path housing your downloads(.pem) Not to cd downloads. (Open another vscode to go back to your working vscode NOT as an administrator, in extensions tab install remote ssh (if you have not already), go to >< open a remote window and select SSH config file to update – select the first (/users/ugosu/.ssh/config) – edit the config to the instance you want to connect – go to >< open a remote window - select connect to host – select instance name – continue - it is best to even install remote development that has remote ssh in it to do all these. If you connect to Jenkins-Ansible instance with this, you can also connect other servers instance using their private IP address within the Jenkins-Ansible server.)
 
 `cd ugosu`
 
@@ -220,12 +226,12 @@ if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyCon
 
 `ssh -A ubuntu@43.93.6.197`
 
-`ssh-add -l`
+`ssh-add -l`]
 
 2048 SHA256:rUynJn4w9ZE0s+x9qpFG4oTg9NpLjMf2QV3hJSFow5c downloads\PBDEV.pem (RSA)
-```
 
-#### Now, Let's test if we can log into other servers Private IP addresses within the VPN Jenkins-Ansible ssh agent:
+> End code here. Then, continue with below code:
+#### 2. Now, Let's test if we can log into other servers Private IP addresses within the VPC Jenkins-Ansible ssh agent:
 
 `ssh ubuntu@172.31.83.144`  -Nginxlb Private IPv4 addresses
 
@@ -260,16 +266,14 @@ if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyCon
 [lb]
 172.31.83.144 ansible_ssh_user='ubuntu'
 ```
-
 ## Step 5 - *Create a Common Playbook* 
 Instruct Ansible what you need performed on all servers listed in 'inventory/dev' as you write in .md.
 In 'common.yml' playbook, you will write configuration for repeatable, re-usable, and multi-machine tasks that is common to systems within the infrastructure.
 Yml starts with '---'. 
 
-#### 1. Update your 'playbooks/common.yml' file with following code:
+#### 1. Update your `playbooks/common.yml` file with following code:
 
----
-- name: update web, and nfs servers
+```- name: update web, and nfs servers
   hosts: webservers, nfs
   remote_user: ec2-user
   become: yes
@@ -294,6 +298,7 @@ Yml starts with '---'.
       apt:
         name: wireshark
         state: latest
+```
 
 ##### *Examine the code above and try to make sense out of it. This playbook is divided into two parts (2 servers), each of them is intended to perform the same task: install wireshark utility (or make sure it is updated to the latest version) on your RHEL 8 and Ubuntu servers. It uses root user to perform this task and respective package manager: yum for RHEL 8 and apt for Ubuntu.*
 
@@ -316,7 +321,7 @@ Create a pull request for 'prj-11' on GitHub by visiting:
 
 `https://github.com/Bethrand/ansible-config-mgt/pull/new/prj-11`
 
-ongithub - compare&pull - create pull request - Merge pull request (if no conflict) - Confirm Merge - code (go to code to check files created). 
+On github - projectname - compare&pull - create pull request - Merge pull request (if no conflict) - Confirm Merge - code (check code to confirm files created). 
 
 #### 3. Head back into your ansible-config-mgt vscode terminal, checkout from the feature branch into the main, and pull down the latest changes.
 
@@ -345,9 +350,10 @@ You can first visit your jenkins server to view latest build and changes made. O
 ## Step 7 – *Run first Ansible test*
 Now, it is time to execute ansible-playbook command and verify if your playbook actually works: 
 
-#### 1. On the ansible-config-mgt separate VSCode: Go to Extensions - type Remote Dev - >< open a remote window - connect to host or select configured file update- C:/Users/ugosu/Downloads/PBDEV.pem - >< open a remote window- - select Linux [Host - Jenkins-Ansible(server name), HostName - 3.93.6.197 (pub IP), User - ubuntu, IdentityFile - C:/Users/ugosu/Downloads/PBDEV.pem (.pem key path) - >< open a remote window - select Linux - Terminal]
+#### 1. On the ansible-config-mgt separate VSCode: Go to Extensions - type Remote Dev - >< open a remote window - connect to host or select configured file update- C:/Users/ugosu/Downloads/PBDEV.pem - >< open a remote window - select Linux 
+[Edit host as follows] `Host - Jenkins-Ansible (server name), HostName - 3.93.6.197 (pub IP), User - ubuntu, IdentityFile - C:/Users/ugosu/Downloads/PBDEV.pem (.pem key path)` - >< open a remote window - select Linux - [for ubuntu Terminal]
 
-open a folder from home directory on the terminal /home/ubuntu - okay
+Then, open a folder from home directory on the terminal /home/ubuntu - okay
 <build_number is 5>
 
 `ansible-playbook -i /var/lib/jenkins/jobs/ansible/builds/<build_number>/archive/inventory/dev.yml /var/lib/jenkins/jobs/ansible/builds/<build_number>/archive/playbooks/common.yml` - *links to inventory/dev.yml & playbooks/common.yml files that worked on*
@@ -356,7 +362,7 @@ open a folder from home directory on the terminal /home/ubuntu - okay
 
 #### 2. you can go to each of the servers and check if wireshark has been installed by running `which wireshark` or `wireshark --version`
 
-Connect via SSH-agent back into your Jenkins-Ansible VPN and run checks
+Connect via SSH-agent back into your Jenkins-Ansible VPC and run checks
 
 `ssh ubuntu@172.31.83.144` -lb
 
@@ -443,9 +449,9 @@ In playbooks/common.yml paste:
         name: America/Los_Angeles 
 ```         
 
-`commit locally with source control, type message, check, yes, ... select push, yes`
+commit vscode - source control - type commit message - check commit - check yes - ... select push on 3 doted line - check yes.
 
-`on github - compare&pull request, create pull request, merge pull request, confirm merge,  build (jenkins),`
+on github - select current project folder - compare&pull request - create pull request - merge pull request - confirm merge - go to Jenkins server - build Jenkins - go to Vscode current working platform and run below:
 
 `git checkout main`
 
