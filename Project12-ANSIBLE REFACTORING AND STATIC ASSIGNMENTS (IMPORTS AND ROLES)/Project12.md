@@ -228,13 +228,9 @@ let's confirm our branch;
 
 `git branch`
 
-`git status`
 
-`git checkout -b prj-11`  - ticket number (prj-11)
 
-#### 2. Checkout the newly created feature branch to your local machine and start building your code and directory structure
 
-#### 3. Create a directory and name it `playbooks` – it will be used to store all your playbook files. Use GIT BASH, PowerShell doesn't understand UNIX cmd on git environment
 
 `mkdir playbooks`
 
@@ -372,8 +368,6 @@ if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyCon
 <Load-Balancer-Private-IP-Address> ansible_ssh_user='ubuntu'
 
 ```
-[nfs]
-172.31.88.2 ansible_ssh_user='ec2-user'
 
 [webservers]
 172.31.83.67 ansible_ssh_user='ec2-user'
@@ -382,8 +376,6 @@ if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyCon
 [db]
 172.31.92.240 ansible_ssh_user='ubuntu' 
 
-[lb]
-172.31.83.144 ansible_ssh_user='ubuntu'
 ```
 ## Step 5 - *Create a Common Playbook* 
 Instruct Ansible what you need performed on all servers listed in 'inventory/dev' as you write in .md.
@@ -438,11 +430,8 @@ Now you have a separate branch, a Pull Request (PR) is employed to get your bran
 #### 2. Create a Pull request (PR)
 Create a pull request for 'prj-11' on GitHub by visiting:
 
-`https://github.com/Bethrand/ansible-config-mgt/pull/new/prj-11`
 
-On github - projectname - compare&pull - create pull request - Merge pull request (if no conflict) - Confirm Merge - code (check code to confirm files created). 
 
-#### 3. Head back into your ansible-config-mgt vscode terminal, checkout from the feature branch into the main, and pull down the latest changes.
 
 `git status`
 
@@ -584,30 +573,3 @@ Using SSH-Agent into Jenkins-Ansible
 
 
 #### run `which wireshark` or `wireshark --version`
-
-`ssh ubuntu@172.31.83.144` -lb
-
-`which wireshark`
-
-`/usr/bin/wireshark`
-
-`date`
-
-Thu Jul 27 08:16:18 PDT 2023
-
-`exit`
-
-`ssh ec2-user@172.31.88.2` nfs
-
-`which --version`
-
-```
-ubuntu@ip-172-31-95-232:~$ ssh ec2-user@172.31.88.2
-Register this system with Red Hat Insights: insights-client --register
-Create an account or view all your systems at https://red.ht/insights-dashboard
-Last login: Thu Jul 27 08:08:49 2023 from 172.31.95.232
-[ec2-user@ip-172-31-88-2 ~]$ wireshark --version
-Wireshark 2.6.2 (v2.6.2)
-```
-
-`exit`
