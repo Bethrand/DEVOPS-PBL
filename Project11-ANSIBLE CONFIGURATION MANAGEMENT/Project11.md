@@ -36,7 +36,7 @@ An illustration diagram of a Bastion Host serving as a VPN.
 
 #### Login to Jenkins browser 
 
-`http://3.93.6.197/:8080/`
+`http://3.93.6.197:8080/`
 
 #### *Enter project 9 Jenkins username and password. But if you terminated your Project 9 instance as is the case here do this below*
 
@@ -98,7 +98,7 @@ README.md
 
 #### 1. Clone down your ansible-config-mgt repo to your Jenkins-Ansible instance through your VSCode extensions and save folder within your workspace. But better to open a VSCode in a seperate window to do this. From bottom of VSCode window, raise the tab to access Terminal into your ansible-config-mgt folder.
 
-To git clone https://github.com/Bethrand/ansible-config-mgt.git , use new Vscode window - open Remote Repository - open repo from Github - Bethrand\ansible-config-mgt - save in project folder - open (it's best to open in a separate vscode window and work there)
+To git clone https://github.com/Bethrand/ansible-config-mgt.git , use new Vscode window - open Remote Repository - open repo from Github - Bethrand/ansible-config-mgt - save in project folder - open (it's best to open in a separate vscode window and work there)
 
 ### Step 3 - *BEGIN ANSIBLE DEVELOPMENT*
 
